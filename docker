@@ -1,0 +1,572 @@
+
+                     DOCKER INSTALATION
+                     ------------------
+
+
+
+1  ec2-user
+2  sudo -i
+3  cat /etc/redhat-release 
+4  yum update -y
+5  sudo yum install -y yum-utils
+6  sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo  
+
+7  sudo yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+
+8  yum update -y
+9  systemctl enable docker
+10 systemctl start docker
+11 systemct1 status docker  
+
+
+-------------------------------------------------------------------------
+                         or 
+  
+repository errors in add this lines 
+
+
+[docker-ce-stable]
+name=Docker CE Stable - $basearch
+baseurl=https://download.docker.com/linux/centos/$releasever/$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://download.docker.com/linux/centos/gpg
+
+----------------------------------------------------------------------------
+              Amazon Linux docker install
+           ----------------------------
+
+
+1. sudo yum update
+2.sudo yum search docker
+3.sudo yum info docker
+4.sudo yum install docker
+
+======================================================
+
+             KUBEADM INSTALLATION
+        -    ---------------------
+
+rm /etc/containerd/config.toml 
+
+ systemctl restart containerd
+
+kubectl get nodes --kubeconfig /etc/kubernetes/kubelet.conf
+
+sudo cp -i /etc/kubernetes/kubelet.conf $HOME/.kube/config
+
+------------------------------------------------------------------------
+
+conection refused problem in worker nodes- VERY IMP
+*********************************************
+
+ mkdir kubelet.conf
+
+10.244.0.0/16
+
+
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
+
+
+
+-------------------------------------------------------------------------
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=
+
+export KUBECONFIG=/etc/kubernites/admin.config
+
+kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
+
+
+
+curl https://raw.githubuserontent.com/projectcalico/calico/v.24.5/manifests/canal.yaml -0
+
+kubectl apply -f canal.yaml
+
+
+   SERVER REFUSED PROBLEM :8080
+-------------------------------
+STEPS:
+
+1.sudo kubeadm init
+2. mkdir -p $HOME/.kube
+3. sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+4.sudo chown $(id -u):$(id -g) $HOME/.kube/config
+5.export KUBECONFIG=$HOME/.kube/config
+
+
+
+-----------------------------------------------------	-----------------------------------------------------
+
+CORRECT EXCUTING  IN VIM
+****************************     
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app:
+spec:
+  containers:
+  - name: myapp-container
+    image: nginx
+    command: ['sh', '-c','echo Hello raji ...&& sleep 3600']
+------------------------------------------------------------------
+                CORRECT EXCUTING  IN VIM
+*********************************************
+  multi container                  
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-site
+  labels:
+    app: web
+spec:
+  containers:
+  - name: front-end
+    image: nginx
+    ports:
+      - containerPort: 80
+  - name: rss-reader
+    image: nickchase/rss-php-nginx:v1
+    ports:
+      - containerPort: 80
+
+-------------------------------------------------------------------------------
+                CORRECT EXCUTING  IN VIM  
+*****************************************
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod-volumesecret
+spec:
+  containers:
+  - name: volumesecret
+    image: redis
+    volumeMounts:
+    - name: koo
+      mountPath: "/opt/secrets"
+      readOnly: true
+  volumes:
+  - name: koo
+    secret:
+      secretName: mysecret-manifest
+
+-------------------------------------------------------------------------------
+ns.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: label-demo
+  namespace: developement
+  labels:
+    environment: production
+    app: nginx
+    proj: Airtel
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+--------------------------------------------------------------------------------------------------
+label.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: label-demo1
+  labels:
+    environment: production
+    app: nginx
+    proj: Airtel
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+
+
+
+
+
+
+CORRECT EXCUTING  IN VIM
+********************************
+annotations --
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: annotations-demo
+  annotations:
+    Provider: Gopi
+    mailid: gopicr42@gmail.com
+    imageregistry: "https://hub.docker.com"
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+      - containerPort: 80
+----------------------------------------------------------------------------
+CORRECT EXCUTING  IN VIM
+********************************
+two - containners
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: two-containers
+spec:
+  containers:
+  - name: busybox1
+    image: busybox
+    command:
+      - sleep
+      - "3600"
+  - name: busybox2
+    image: busybox
+    command:
+      - sleep
+      - "3600"
+
+
+-------------------------------------------------------------------
+       
+CORRECT EXCUTING  IN VIM
+********************************
+       deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+
+    spec:
+      containers:
+      -  name: nginx
+        image: nginx
+        ports:
+        -  containerPort: 80
+
+---------------------------------------------------------------------------
+CORRECT EXCUTING  IN VIM
+********************************
+
+myservices
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 80
+---------------------------------------------------------------------------------
+CORRECT EXCUTING  IN VIM
+********************************
+
+nodeport -deployemnt
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment1
+  labels:
+    app: nginx-app
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-app
+  template:
+    metadata:
+      labels:
+        app: nginx-app
+    spec:
+      containers:
+      - name: nginx-np-container
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+--------------------------------------------------------------------------------
+
+CORRECT EXCUTING  IN VIM
+********************************
+
+
+Nodeport services
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service-nodeport
+  labels:
+    app: nginx-app
+spec:
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 31000
+  selector:
+    app: nginx-app
+
+--------------------------------------------------------------------------
+
+
+CORRECT EXCUTING  IN VIM
+******************************** 
+
+empty DIR
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: emptydir-one-container
+spec:
+  containers:
+    - image: centos:7
+      command:
+        - sleep
+        - "3600"
+      name: test-container
+      volumeMounts:
+      - mountPath: /tmp
+        name: tmp-volume
+  volumes:
+  - name: tmp-volume
+    emptyDir: {}
+
+------------------------------------------------------------------------------
+CORRECT EXCUTING  IN VIM
+********************************
+
+pv data
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pvv
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+--------------------------------------------------------------------------
+
+CORRECT EXCUTING  IN VIM
+********************************
+
+pvc data
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc2
+spec:
+  storageClassName: local-storage
+  accessModes:
+   - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+--------------------------------------------------------------------------------
+
+
+CORRECT EXCUTING  IN VIM
+********************************
+
+pvc pod hostpath
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["/bin/sh","-c","while true;do sleep 3600;done"]
+    volumeMounts:
+    - mountPath: "/mnt/storage"
+      name: my-storage
+  volumes:
+  - name: my-storage
+    persistentVolumeClaim:
+      claimName: my-pvc
+
+*****************************************************************************************
+
+CORRECT EXCUTING  IN VIM
+********************************
+
+
+config file
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-configmap-pod
+spec:
+  containers:
+  - name: my-container
+    image: alpine
+    command: ['sh', '-c', "echo $(my_var) && sleep 3600"]
+    env:
+    - name: my_var
+      valueFrom:
+        configMapKeyRef:
+          name: my-configmap
+          key: mykey
+
+
+
+
+
+
+
+----------------------------------------------------------~
+
+DEAMON SETUP
+
+
+apiVersion: apps/v1
+
+kind: DaemonSet
+
+metadata:
+
+  name: fluentd-elasticsearch
+
+  namespace: kube-system
+
+  labels:
+
+    k8s-app: fluentd-logging
+
+spec:
+
+  selector:
+
+    matchLabels:
+
+      name: fluentd-elasticsearch
+
+  template:
+
+    metadata:
+
+      labels:
+
+        name: fluentd-elasticsearch
+
+    spec:
+
+      tolerations:
+
+      # these tolerations are to have the daemonset runnable on control plane nodes
+
+      # remove them if your control plane nodes should not run pods
+
+      - key: node-role.kubernetes.io/control-plane
+
+        operator: Exists
+
+        effect: NoSchedule
+
+      - key: node-role.kubernetes.io/master
+
+        operator: Exists
+
+        effect: NoSchedule
+
+      containers:
+
+      - name: fluentd-elasticsearch
+
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+
+        resources:
+
+          limits:
+
+            memory: 200Mi
+
+          requests:
+
+            cpu: 100m
+
+            memory: 200Mi
+
+        volumeMounts:
+
+        - name: varlog
+
+          mountPath: /var/log
+
+      terminationGracePeriodSeconds: 30
+
+      volumes:
+
+      - name: varlog
+
+        hostPath:
+
+          path: /var/log
+
+------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+ 
+
+
+
+
