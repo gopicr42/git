@@ -1,0 +1,205 @@
+                       ANSIBLE
+                 **************
+amazon linux instance
+dnf install epel-release
+sudo amazon-linux-extras install epel
+
+
+
+user.yml
+- hosts: webserver
+  become: true
+  become_user: root
+  tasks:
+       - name: UserAccountCreation
+         user:
+           name: jai
+           uid: 1100
+           state: present
+------------------------------------------------------------------------
+    httpd.yml
+
+- hosts: webservers
+  become: true
+  become_user: root
+  tasks:
+      - name: Installation of HTTPD
+        yum:
+           name: httpd
+           state: present
+      - name: Creation of index.html page
+        copy:
+          content: "WELCOME TO ANSIBLE IT AUTOMATION TOOL"
+          dest: /var/www/html/index.html
+      - name: Starting HTTPD Service
+        service:
+          name: httpd
+          state: started
+          enabled: true
+
+
+
+--------------------------------------------------------------------------------
+  ftp.yml
+
+
+- hosts: webserver
+  become: true
+  become_user: root
+  tasks:
+    - name: Installation of FTP
+      yum:
+        name: vsftpd
+        state: present
+    - name: Creation of sample
+      copy:
+        content: "This is sample"
+        dest: /var/ftp/sample
+    - name: Starting FTP service
+      service:
+        name: vsftpd
+        state: started
+        enabled: true
+
+
+-------------------------------------------------------------------------------
+
+multi.yml
+
+
+
+- hosts: webserver
+  become: true
+  become_user: root
+  tasks:
+    - name: Installation of HTTP & Firewalld Packages
+      yum:
+        name:
+         - httpd
+         - firewalld
+    - name: Creating index.html
+      copy:
+        content: "WELCOME TO ANSIBLE AUTOMATION TOOL"
+        dest: /var/www/html/index.html
+    - name: Firewalld Start & Enabled
+      service:
+        name: firewalld
+        state: started
+        enabled: true
+    - name: Firewalld permits access to httpd service
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
+    - name: Httpd Start &  Enabled
+      service:
+        name: httpd
+        state: started
+        enabled: true
+- name: Test Intranet Web Server Connctivity
+  hosts: webserver
+  become: no
+  tasks:
+    - name: connect to Intranet Web Server
+      uri:
+        url: http://agent1
+        return_content: yes
+        status_code: 200
+
+--------------------------------------------------------------------------------------
+
+var.yml
+
+- hosts: webserver
+  become: true
+  become_user: root
+  vars:
+     web_pkg: httpd
+     firewall_pkg: firewalld
+     perl_pkg: perl
+  tasks:
+    - name: Install package
+      yum:
+        name:
+           - "{{ web_pkg }}"
+           - "{{ firewall_pkg }}"
+           - "{{ perl_pkg }}"
+        state: latest
+    - name: Start & Enable Service httpd
+      service:
+        name: "{{ web_pkg }}"
+        enabled: true
+        state: started
+    - name: Create web content
+      copy:
+        content: "Welcome To Ansible"
+        dest: /var/www/index.html
+
+----------------------------------------------------------------
+
+varl.yml
+
+
+
+- hosts: webserver
+  become: true
+  become_user: root
+  vars:
+    remote_dir: /etc/devops/ansible
+    ans_file: sample
+  tasks:
+    - name: Create a Remote Directory
+      file:
+        state: directory
+        recurse: yes
+        path: "{{ remote_dir }}"
+    - name: copy a file
+      copy:
+        src: "{{ ans_file }}"
+        dest: "{{ remote_dir}}"
+
+note: sample file mustbe created (mkdir sample)
+----------------------------------------------------------------------------------------
+loop1.yml
+
+- hosts: webserver
+  become: true
+  become_user: root
+  tasks:
+    - name: Apache & FTP are running
+      service:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - httpd
+        - vsftpd
+
+------------------------------------------------------------------------------------------
+loop2.yml
+
+- hosts: webserver
+  become: true
+  become_user: root
+  vars:
+    my_services:
+      - httpd
+      - vsftpd
+  tasks:
+    - name: Apache & FTP are running
+      service:
+        name: "{{ item }}"
+        state: started
+      loop: "{{ my_services }}"
+
+
+
+
+
+
+
+
+
+
+
+
